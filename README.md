@@ -48,13 +48,28 @@ This project is a Java-based Pet Health Care Tracker. The application manages pe
 - Executable JAR deployment
 
 ---
+## Unit Testing
+
+The application includes JUnit 5 unit tests to verify the core functionality of the Pet Health Care Tracker.
+
+The tests cover:
+
+- Adding a pet record
+- Removing a pet record
+- Updating a pet record
+- Loading the default pet records file
+- Calculating a pet health score (high score)
+- Calculating a pet health score (lower score)
+- Successful operations
+- Expected failures for invalid or non-existent records
+
+All unit tests pass successfully before deployment.
 
 ## Repository Contents
 
-- **Main.java** - Controls program execution and user interaction.
+- **PetCareApp.java** - Contains the main menu and application workflow.
 - **Pet.java** - Represents individual pet objects.
 - **PetManager.java** - Manages pet records and application operations.
-- **PetCareApp.java** - Contains the main menu and application workflow.
 - **HealthCalculator.java** - Generates pet health summaries.
 - **pet_records.txt** - Sample data file containing pet records.
 - **pom.xml** - Maven project configuration.
