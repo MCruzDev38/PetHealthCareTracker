@@ -5,13 +5,14 @@ package com.michelle;
  * CEN 3024C - Software Development I
  * July 3,2026
  * HealthCalculator.java
- * This class calculates a pet health score based on age and weight.
+ * This class calculates a pet health score based on age, weight, health notes, vaccination records
+ * and the most recent veterinary visit.
  */
 public class HealthCalculator {
 
     /**
      * Method: calculateHealthScore
-     * Parameters: age, weight
+     * Parameters: pet - Pet object containing the health information
      * Return: int
      * Purpose: Calculates an overall pet health score out of 100 based on age, weight, health notes, vaccination records
      * and the most recent veterinary visit.

@@ -4,6 +4,9 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Scanner;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 
 /**
  * Michelle Cruz
@@ -40,23 +43,40 @@ public class PetManager {
      * Return: none
      * Purpose: Loads the default pet records file when the program starts.
      */
+
     private void loadDefaultPetFile() {
-        File petFile = new File("src/main/resources/pet_records.txt");
+        if (loadPetFile("src/main/resources/pet_records.txt")) {
+            System.out.println("Default pet records loaded.");
+        } else {
+            System.out.println("Default pet records file could not be loaded.");
+        }
+    }
 
-        if (petFile.exists()) {
-            try (Scanner fileScanner = new Scanner(petFile)) {
-                while (fileScanner.hasNextLine()) {
-                    String line = fileScanner.nextLine().trim();
+    /**
+     * Method: loadPetFile
+     * Parameters: fileName
+     * Return: boolean
+     * Purpose: Loads pet records from a file and returns true if the file was found.
+     */
+    public boolean loadPetFile(String fileName) {
+        File petFile = new File(fileName);
 
-                    if (!line.isEmpty()) {
-                        createPetFromLine(line);
-                    }
+        if (!petFile.exists()) {
+            return false;
+        }
+
+        try (Scanner fileScanner = new Scanner(petFile)) {
+            while (fileScanner.hasNextLine()) {
+                String line = fileScanner.nextLine().trim();
+
+                if (!line.isEmpty()) {
+                    createPetFromLine(line);
                 }
-
-                System.out.println("Default pet records loaded.");
-            } catch (FileNotFoundException exception) {
-                System.out.println("Default pet records file could not be loaded.");
             }
+
+            return true;
+        } catch (FileNotFoundException exception) {
+            return false;
         }
     }
 
@@ -191,7 +211,7 @@ public class PetManager {
 
         String[] fields = line.split(",", -1);
 
-        if (fields.length != 10) {
+        if (fields.length != 11) {
             return false;
         }
 
@@ -201,13 +221,15 @@ public class PetManager {
             String species = fields[2].trim();
             String breed = fields[3].trim();
             int age = Integer.parseInt(fields[4].trim());
-            double weight = Double.parseDouble(fields[5].trim());
-            String healthNotes = fields[6].trim();
-            String medicationName = fields[7].trim();
-            String lastVetVisit = fields[8].trim();
-            String vaccinationRecords = fields[9].trim();
+            int ageMonths = Integer.parseInt(fields[5].trim());
 
-            if (petID <= 0 || age < 0 || weight <= 0 || petName.isEmpty() || species.isEmpty()) {
+            double weight = Double.parseDouble(fields[6].trim());
+            String healthNotes = fields[7].trim();
+            String medicationName = fields[8].trim();
+            String lastVetVisit = fields[9].trim();
+            String vaccinationRecords = fields[10].trim();
+
+            if (petID <= 0 || age < 0 || ageMonths < 0 || ageMonths > 11 || weight <= 0 || petName.isEmpty() || species.isEmpty()) {
                 return false;
             }
 
@@ -215,7 +237,7 @@ public class PetManager {
                 return false;
             }
 
-            pets.add(new Pet(petID, petName, species, breed, age, weight,
+            pets.add(new Pet(petID, petName, species, breed, age, ageMonths, weight,
                     healthNotes, medicationName, lastVetVisit, vaccinationRecords));
             return true;
 
@@ -261,20 +283,82 @@ public class PetManager {
             return "A pet with that ID already exists. Please use a unique Pet ID.";
         }
 
-        String petName = readRequiredText("Pet Name: ");
-        String species = readRequiredText("Species: ");
-        String breed = readRequiredText("Breed: ");
-        int age = readNonNegativeInt("Age: ");
-        double weight = readPositiveDouble("Weight in pounds: ");
-        String healthNotes = readRequiredText("Health Notes: ");
-        String medicationName = readRequiredText("Medication Name: ");
-        String lastVetVisit = readRequiredText("Last Vet Visit: ");
-        String vaccinationRecords = readRequiredText("Vaccination Records: ");
+        String petName = readTextWithLetter("Pet Name: ");
+        String species = readTextWithLetter("Species: ");
+        String breed = readTextWithLetter("Breed: ");
 
-        pets.add(new Pet(petID, petName, species, breed, age, weight,
-                healthNotes, medicationName, lastVetVisit, vaccinationRecords));
+        int age = readValidAge("Age (years): ");
+        int ageMonths = readValidMonths("Age (months 0-11): ");
 
-        return "Pet record added successfully.";
+        while (age == 0 && ageMonths == 0) {
+            System.out.println("A pet must be at least 1 month old. ");
+            age = readValidAge("Age (years): ");
+            ageMonths = readValidMonths("Age (months 0-11): ");
+            }
+
+        double weight = readPositiveDouble("Weight (pounds): ");
+
+        String healthNotes = readOptionalText("Health Notes (Leave blank and press Enter if none): ");
+        String medicationName = readOptionalText("Medication Name (Leave blank and press Enter if none): ");
+        String lastVetVisit = readOptionalDate(
+                "Last Vet Visit (MM/DD/YY or MM/DD/YYYY) (Leave blank and press Enter if none): ");
+        String vaccinationRecords = readOptionalText("Vaccination Records (Leave blank and press Enter if none): ");
+        Pet newPet = new Pet(petID, petName, species, breed, age, ageMonths, weight,
+                healthNotes, medicationName, lastVetVisit, vaccinationRecords);
+
+        if (addPetRecord(newPet)) {
+            return "Pet record added successfully.";
+        }
+
+        return "Pet record could not be added.";
+    }
+
+    /**
+     * Method: addPetRecord
+     * Parameters: pet
+     * Return: boolean
+     * Purpose: Adds a pet record if the pet is valid and the ID is unique.
+     */
+    public boolean addPetRecord(Pet pet) {
+        if (pet == null) {
+            return false;
+        }
+
+        if (findPetByID(pet.getPetID()) != null) {
+            return false;
+        }
+
+        pets.add(pet);
+        return true;
+    }
+
+    /**
+     * Method: removePetByID
+     * Parameters: petID
+     * Return: boolean
+     * Purpose: Removes a pet by its ID.
+     */
+    public boolean removePetByID(int petID) {
+
+        Pet pet = findPetByID(petID);
+
+        if (pet == null) {
+            return false;
+        }
+
+        pets.remove(pet);
+        return true;
+    }
+
+    public boolean updatePetName(int petID, String newName) {
+        Pet pet = findPetByID(petID);
+
+        if (pet == null || newName == null || newName.trim().isEmpty()) {
+            return false;
+        }
+
+        pet.setPetName(newName);
+        return true;
     }
 
     /**
@@ -304,8 +388,11 @@ public class PetManager {
             return "Pet record removal was canceled.";
         }
 
-        pets.remove(pet);
-        return "Pet record removed successfully.";
+        if (removePetByID(pet.getPetID())) {
+            return "Pet record removed successfully.";
+        }
+
+        return "Pet record removal failed.";
     }
 
     /**
@@ -392,7 +479,18 @@ public class PetManager {
                 System.out.println("Breed updated.");
                 return true;
             case 5:
-                pet.setAge(readNonNegativeInt("New Age: "));
+                int newAge = readValidAge("New Age (years): ");
+                int newAgeMonths = readValidMonths("New Age (months 0-11): ");
+
+                while (newAge == 0 && newAgeMonths == 0) {
+                    System.out.println("A pet must be at least 1 month old.");
+                    newAge = readValidAge("New Age (years): ");
+                    newAgeMonths = readValidMonths("New Age (months 0-11): ");
+                }
+
+                pet.setAge(newAge);
+                pet.setAgeMonths(newAgeMonths);
+
                 System.out.println("Age updated.");
                 return true;
             case 6:
@@ -400,19 +498,19 @@ public class PetManager {
                 System.out.println("Weight updated.");
                 return true;
             case 7:
-                pet.setHealthNotes(readRequiredText("New Health Notes: "));
+                pet.setHealthNotes(readOptionalText("Health Notes (Leave blank and press Enter if none): "));
                 System.out.println("Health notes updated.");
                 return true;
             case 8:
-                pet.setMedicationName(readRequiredText("New Medication Name: "));
+                pet.setMedicationName(readOptionalText("Medication Name (Leave blank and press Enter if none): "));
                 System.out.println("Medication name updated.");
                 return true;
             case 9:
-                pet.setLastVetVisit(readRequiredText("New Last Vet Visit: "));
+                pet.setLastVetVisit(readOptionalDate("New Last Vet Visit (MM/DD/YY or MM/DD/YYYY) (Leave blank and press Enter if none): "));
                 System.out.println("Last vet visit updated.");
                 return true;
             case 10:
-                pet.setVaccinationRecords(readRequiredText("New Vaccination Records: "));
+                pet.setVaccinationRecords(readOptionalText("Vaccination Records (Leave blank and press Enter if none): "));
                 System.out.println("Vaccination records updated.");
                 return true;
             case 11:
@@ -449,8 +547,14 @@ public class PetManager {
                             "Name: " + pet.getPetName() + "\n" +
                             "Species: " + pet.getSpecies() + "\n" +
                             "Breed: " + pet.getBreed() + "\n\n" +
-
-                            "Age: " + pet.getAge() + " years\n" +
+                            "Age: " +
+                            (
+                                    pet.getAge() == 0
+                                            ? pet.getAgeMonths() + " months"
+                                            : (pet.getAgeMonths() == 0
+                                            ? pet.getAge() + " years"
+                                            : pet.getAge() + " years " + pet.getAgeMonths() + " months")
+                            ) + "\n" +
                             "Weight: " + pet.getWeight() + " lbs\n\n" +
 
                             "Health Notes:\n" +
@@ -573,6 +677,46 @@ public class PetManager {
     }
 
     /**
+     * Method: readValidAge
+     * Parameters: prompt
+     * Return: int
+     * Purpose: Reads a valid pet age between 0 and 100 years.
+     */
+    private int readValidAge(String prompt) {
+
+        while (true) {
+
+            int age = readInt(prompt);
+
+            if (age >= 0 && age <= 100) {
+                return age;
+            }
+
+            System.out.println("Please enter an age between 0 and 100.");
+        }
+    }
+
+    /**
+     * Method: readValidMonths
+     * Parameters: prompt
+     * Return: int
+     * Purpose: Reads a valid month value between 0 and 11.
+     */
+    private int readValidMonths(String prompt) {
+
+        while (true) {
+
+            int months = readInt(prompt);
+
+            if (months >= 0 && months <= 11) {
+                return months;
+            }
+
+            System.out.println("Please enter a value between 0 and 11.");
+        }
+    }
+
+    /**
      * Method: readPositiveDouble
      * Parameters: prompt
      * Return: double
@@ -618,6 +762,81 @@ public class PetManager {
             System.out.println("This field cannot be blank.");
         }
     }
+
+    private String readTextWithLetter(String prompt) {
+        while (true) {
+            System.out.print(prompt);
+            String value = scanner.nextLine().trim();
+
+            if (!value.isEmpty() && value.matches(".*[a-zA-Z].*")) {
+                return value;
+            }
+
+            System.out.println("Please enter a valid response that includes at least one letter.");
+        }
+    }
+
+    private String readOptionalText(String prompt) {
+        System.out.print(prompt);
+        String value = scanner.nextLine().trim();
+
+        if (value.isEmpty()) {
+            return "None";
+        }
+
+        return value;
+    }
+
+    private String readValidDate(String prompt) {
+
+        DateTimeFormatter[] formats = {
+                DateTimeFormatter.ofPattern("M/d/yy"),
+                DateTimeFormatter.ofPattern("M/d/yyyy")
+        };
+
+        while (true) {
+
+            System.out.print(prompt);
+            String input = scanner.nextLine().trim();
+
+            for (DateTimeFormatter formatter : formats) {
+                try {
+                    LocalDate.parse(input, formatter);
+                    return input;
+                } catch (DateTimeParseException ignored) {
+                }
+            }
+
+            System.out.println("Please enter a valid date using MM/DD/YY or MM/DD/YYYY.");
+        }
+    }
+
+    private String readOptionalDate(String prompt) {
+        DateTimeFormatter[] formats = {
+                DateTimeFormatter.ofPattern("M/d/yy"),
+                DateTimeFormatter.ofPattern("M/d/yyyy")
+        };
+
+        while (true) {
+            System.out.print(prompt);
+            String input = scanner.nextLine().trim();
+
+            if (input.isEmpty()) {
+                return "None";
+            }
+
+            for (DateTimeFormatter formatter : formats) {
+                try {
+                    LocalDate.parse(input, formatter);
+                    return input;
+                } catch (DateTimeParseException ignored) {
+                }
+            }
+
+            System.out.println("Please enter a valid date using MM/DD/YY or MM/DD/YYYY, or leave blank if none.");
+        }
+    }
+
     /**
      * Method: getHealthAssessment
      * Parameters: score

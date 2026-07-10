@@ -14,19 +14,21 @@ public class Pet {
     private String species;
     private String breed;
     private int age;
+    private int ageMonths;
     private double weight;
     private String healthNotes;
     private String medicationName;
     private String lastVetVisit;
     private String vaccinationRecords;
 
-    public Pet(int petID, String petName, String species, String breed, int age, double weight,
+    public Pet(int petID, String petName, String species, String breed, int age, int ageMonths, double weight,
                String healthNotes, String medicationName, String lastVetVisit, String vaccinationRecords) {
         this.petID = petID;
         this.petName = petName;
         this.species = species;
         this.breed = breed;
         this.age = age;
+        this.ageMonths = ageMonths;
         this.weight = weight;
         this.healthNotes = healthNotes;
         this.medicationName = medicationName;
@@ -56,6 +58,14 @@ public class Pet {
 
     public int getAge() {
         return age;
+    }
+
+    public int getAgeMonths() {
+        return ageMonths;
+    }
+
+    public void setAgeMonths(int ageMonths) {
+        this.ageMonths = ageMonths;
     }
 
     public double getWeight() {
@@ -120,7 +130,12 @@ public class Pet {
                 "\nPet Name: " + petName +
                 "\nSpecies: " + species +
                 "\nBreed: " + breed +
-                "\nAge: " + age +
+                "\nAge: " +
+                (age == 0
+                        ? ageMonths + " months"
+                        : (ageMonths == 0
+                        ? age + " years"
+                        : age + " years " + ageMonths + " months")) +
                 "\nWeight: " + weight +
                 "\nHealth Notes: " + healthNotes +
                 "\nMedication Name: " + medicationName +
