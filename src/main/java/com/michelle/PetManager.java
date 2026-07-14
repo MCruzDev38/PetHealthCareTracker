@@ -65,6 +65,12 @@ public class PetManager {
             return false;
         }
 
+        // Save the current records in case the new file is invalid.
+        ArrayList<Pet> originalPets = new ArrayList<>(pets);
+
+        // Clear the list temporarily while testing the selected file.
+        pets.clear();
+
         try (Scanner fileScanner = new Scanner(petFile)) {
             while (fileScanner.hasNextLine()) {
                 String line = fileScanner.nextLine().trim();
@@ -74,10 +80,40 @@ public class PetManager {
                 }
             }
 
+            // If no valid pets were created, restore the old records.
+            if (pets.isEmpty()) {
+                pets.addAll(originalPets);
+                return false;
+            }
+
             return true;
-        } catch (FileNotFoundException exception) {
+
+        } catch (FileNotFoundException | RuntimeException exception) {
+            // Restore the old records if reading or parsing fails.
+            pets.clear();
+            pets.addAll(originalPets);
             return false;
         }
+    }
+
+    /**
+     * Method: getPets
+     * Parameters: none
+     * Return: ArrayList<Pet>
+     * Purpose: Returns a copy of the current pet records for display in the GUI.
+     */
+    public ArrayList<Pet> getPets() {
+        return new ArrayList<>(pets);
+    }
+
+    /**
+     * Method: clearPets
+     * Parameters: none
+     * Return: void
+     * Purpose: Removes the current records before the GUI loads a selected file.
+     */
+    public void clearPets() {
+        pets.clear();
     }
 
     /**
