@@ -9,7 +9,7 @@ Pet Health Care Tracker is a Java Swing desktop application that allows users to
 ## Program Tools
 
 - IntelliJ IDEA
-- Java 25 (Developed and Tested)
+- Java 17 (Developed and Tested)
 - Java Swing
 - Maven
 
@@ -104,18 +104,16 @@ All unit tests pass successfully before deployment.
 
 ### Requirements
 
-- Java Runtime Environment (JRE) or Java Development Kit (JDK)
-- IntelliJ IDEA (recommended for development)
+- Java 17 or newer (JDK or JRE)
 - The provided `pet_records.txt` file
 
 ### Running the Program
 
-1. Open the project in IntelliJ IDEA.
-2. Run `PetCareGUI.java`.
-3. Click the **Load Records** button.
-4. Select the provided `pet_records.txt` file.
-5. Use the graphical interface to display, add, update, remove, and summarize pet records.
+1. Launch `PetHealthCareTracker.jar`.
+2. Click **Load Records**.
+3. Browse to and select the provided `pet_records.txt` file.
+4. Use the graphical interface to display, add, update, remove, and summarize pet records.
 
-The application may also be packaged and executed as an executable JAR file as well.
+The application can also be opened in IntelliJ IDEA for development and testing
 
 ---
