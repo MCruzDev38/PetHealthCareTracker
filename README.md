@@ -1,8 +1,8 @@
-# PetHealthCareTracker
+# Pet Health Care Tracker
 
 ## Program Description
 
-This project is a Java-based Pet Health Care Tracker. The application manages pet health records by loading information from a text file and allows users to add, update, remove, display, and summarize pet records through a menu-driven interface.
+Pet Health Care Tracker is a Java Swing desktop application that allows users to manage pet health records through a graphical user interface (GUI). The application loads pet records from a text file and enables users to display, add, update, remove, and summarize pet records in an organized and user-friendly interface. The project demonstrates object-oriented programming principles, file handling, input validation, and Java Swing GUI development.
 
 ---
 
@@ -10,6 +10,7 @@ This project is a Java-based Pet Health Care Tracker. The application manages pe
 
 - IntelliJ IDEA
 - Java 25 (Developed and Tested)
+- Java Swing
 - Maven
 
 ---
@@ -24,11 +25,13 @@ This project is a Java-based Pet Health Care Tracker. The application manages pe
 - File Input and Output
 - Exception Handling
 - Data Validation
-- User Input with Scanner
-- Loops and Conditional Statements
-- String Formatting
+- Date Validation
 - Object-Oriented Design
-- UML-Based Program Development
+- Java Swing GUI Development
+- JTable
+- JOptionPane Dialogs
+- Layout Managers (BorderLayout, FlowLayout, GridBagLayout)
+- Custom JPanel Components
 - Maven Project Structure
 - Executable JAR Deployment
 
@@ -37,17 +40,20 @@ This project is a Java-based Pet Health Care Tracker. The application manages pe
 ## Program Features
 
 - Load pet records from a text file
-- Display all pet records
+- Display pet records in a JTable
 - Add new pet records
 - Update existing pet records
 - Remove pet records
 - Prevent duplicate pet IDs
-- Validate pet information before storing records
+- Validate user input before storing records
+- Validate numeric values and dates
 - Generate pet health summaries
-- Menu-driven user interface
-- Executable JAR deployment
+- Status bar feedback
+- Confirmation dialogs
+- Professional Java Swing graphical user interface
 
 ---
+
 ## Unit Testing
 
 The application includes JUnit 5 unit tests to verify the core functionality of the Pet Health Care Tracker.
@@ -65,14 +71,32 @@ The tests cover:
 
 All unit tests pass successfully before deployment.
 
+---
+
 ## Repository Contents
 
-- **PetCareApp.java** - Contains the main menu and application workflow.
+- **PetCareGUI.java** - Main graphical user interface for the application.
 - **Pet.java** - Represents individual pet objects.
 - **PetManager.java** - Manages pet records and application operations.
 - **HealthCalculator.java** - Generates pet health summaries.
+- **RoundedPanel.java** - Custom component used to create the rounded application title banner.
 - **pet_records.txt** - Sample data file containing pet records.
 - **pom.xml** - Maven project configuration.
+
+---
+
+## Graphical User Interface Highlights
+
+- Custom pet-themed application logo
+- Rounded title banner
+- Color-themed buttons and interface
+- Zebra-striped data table for improved readability
+- Scrollable JTable for displaying pet records
+- Status bar feedback
+- File selection using JFileChooser
+- Confirmation and validation dialogs
+- Professional desktop application layout
+- Clean and user-friendly interface
 
 ---
 
@@ -80,24 +104,18 @@ All unit tests pass successfully before deployment.
 
 ### Requirements
 
-- Java Runtime Environment (JRE) or Java Development Kit (JDK) installed
-- The executable `PetHealthCareTracker.jar` file
-- The `pet_records.txt` file in the same folder as the JAR
+- Java Runtime Environment (JRE) or Java Development Kit (JDK)
+- IntelliJ IDEA (recommended for development)
+- The provided `pet_records.txt` file
 
 ### Running the Program
 
-1. Open a command prompt or terminal.
-2. Navigate to the folder containing the executable JAR.
-3. Run:
+1. Open the project in IntelliJ IDEA.
+2. Run `PetCareGUI.java`.
+3. Click the **Load Records** button.
+4. Select the provided `pet_records.txt` file.
+5. Use the graphical interface to display, add, update, remove, and summarize pet records.
 
-```bash
-java -jar PetHealthCareTracker.jar
-```
+The application may also be packaged and executed as an executable JAR file as well.
 
-4. When prompted, enter:
-
-```text
-pet_records.txt
-```
-
-5. Use the menu options to load, display, add, update, remove, or summarize pet records.
+---
