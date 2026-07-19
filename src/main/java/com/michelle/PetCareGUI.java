@@ -141,6 +141,7 @@ public class PetCareGUI extends JFrame {
         displayButton.setPreferredSize(new Dimension(145, 32));
 
         loadButton.addActionListener(event -> loadRecords());
+
         displayButton.addActionListener(event -> refreshPetTable());
 
         addButton.addActionListener((ActionEvent event) -> showAddPetDialog());
@@ -310,9 +311,9 @@ public class PetCareGUI extends JFrame {
      */
     private void loadRecords() {
         JFileChooser fileChooser = new JFileChooser();
-        fileChooser.setDialogTitle("Select Pet Records File");
+        fileChooser.setDialogTitle("Select SQLite Database");
 
-        int selection = fileChooser.showOpenDialog(this);
+        int selection = fileChooser.showSaveDialog(this);
 
         if (selection != JFileChooser.APPROVE_OPTION) {
             statusLabel.setText("File selection canceled.");
@@ -321,10 +322,10 @@ public class PetCareGUI extends JFrame {
 
         File selectedFile = fileChooser.getSelectedFile();
 
-        if (!selectedFile.getName().toLowerCase().endsWith(".txt")) {
+        if (!selectedFile.getName().toLowerCase().endsWith(".db")) {
             JOptionPane.showMessageDialog(
                     this,
-                    "Please select a valid .txt pet-record file.",
+                    "Please select a valid SQLite (.db) database.",
                     "Invalid File Type",
                     JOptionPane.ERROR_MESSAGE
             );
@@ -333,11 +334,11 @@ public class PetCareGUI extends JFrame {
             return;
         }
 
-        boolean loaded = petManager.loadPetFile(
+        boolean loaded = petManager.connectToDatabase(
                 selectedFile.getAbsolutePath()
         );
 
-        if (loaded && !petManager.getPets().isEmpty()) {
+        if (loaded){
             refreshPetTable();
 
             JOptionPane.showMessageDialog(
@@ -876,6 +877,18 @@ public class PetCareGUI extends JFrame {
                 pet.setVaccinationRecords(
                         vaccinationsField.getText().trim()
                 );
+
+                if (!petManager.updatePetRecord(pet)) {
+                    JOptionPane.showMessageDialog(
+                            this,
+                            "The pet record could not be updated in the database.",
+                            "Update Failed",
+                            JOptionPane.ERROR_MESSAGE
+                    );
+
+                    statusLabel.setText("Pet update failed.");
+                    return;
+                }
 
                 refreshPetTable();
 

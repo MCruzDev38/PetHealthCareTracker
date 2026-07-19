@@ -22,6 +22,7 @@ public class PetManager {
     private final ArrayList<Pet> pets;
     private final HealthCalculator healthCalculator;
     private final Scanner scanner;
+    private final DatabaseManager databaseManager;
 
     /**
      * Method: PetManager
@@ -33,8 +34,7 @@ public class PetManager {
         pets = new ArrayList<>();
         healthCalculator = new HealthCalculator();
         scanner = new Scanner(System.in);
-
-        loadDefaultPetFile();
+        databaseManager = new DatabaseManager();
     }
 
     /**
@@ -94,6 +94,21 @@ public class PetManager {
             pets.addAll(originalPets);
             return false;
         }
+    }
+
+    public boolean connectToDatabase(String databasePath) {
+        if (databasePath == null || databasePath.trim().isEmpty()) {
+            return false;
+        }
+
+        boolean connected = databaseManager.connect(databasePath);
+
+        if (connected) {
+            pets.clear();
+            pets.addAll(databaseManager.getAllPets());
+        }
+
+        return connected;
     }
 
     /**
@@ -356,11 +371,16 @@ public class PetManager {
      * Purpose: Adds a pet record if the pet is valid and the ID is unique.
      */
     public boolean addPetRecord(Pet pet) {
-        if (pet == null) {
+
+        if (pet == null || !databaseManager.isConnected()) {
             return false;
         }
 
-        if (findPetByID(pet.getPetID()) != null) {
+        if (databaseManager.petIDExists(pet.getPetID())) {
+            return false;
+        }
+
+        if (!databaseManager.insertPet(pet)) {
             return false;
         }
 
@@ -376,24 +396,21 @@ public class PetManager {
      */
     public boolean removePetByID(int petID) {
 
+        if (!databaseManager.isConnected()) {
+            return false;
+        }
+
         Pet pet = findPetByID(petID);
 
         if (pet == null) {
             return false;
         }
 
-        pets.remove(pet);
-        return true;
-    }
-
-    public boolean updatePetName(int petID, String newName) {
-        Pet pet = findPetByID(petID);
-
-        if (pet == null || newName == null || newName.trim().isEmpty()) {
+        if (!databaseManager.deletePet(petID)) {
             return false;
         }
 
-        pet.setPetName(newName);
+        pets.remove(pet);
         return true;
     }
 
@@ -429,6 +446,15 @@ public class PetManager {
         }
 
         return "Pet record removal failed.";
+    }
+
+    public boolean updatePetRecord(Pet pet) {
+
+        if (pet == null || !databaseManager.isConnected()) {
+            return false;
+        }
+
+        return databaseManager.updatePet(pet, pet.getPetID());
     }
 
     /**
